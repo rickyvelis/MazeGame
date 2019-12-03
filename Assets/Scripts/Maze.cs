@@ -15,6 +15,9 @@ public class Maze : MonoBehaviour
 
     private MazeAlgorithm _ma;
 
+    //VARS vor camera
+
+
     public void Start()
     {
         BeginGame();
@@ -33,10 +36,27 @@ public class Maze : MonoBehaviour
         StartCoroutine(_ma.Generate());
         if (_ma.CourseComplete)
         {
-            //Do thing
+            //Play the actual game
         }
 
-        transform.position = new Vector3((Size * SizeX / 2), 0.0f, (Size * SizeY / 2));
+        SetOrthCamSize();
+        transform.position = new Vector3((Size * SizeX / 2) - Size/2, 0.0f, (Size * SizeY / 2) - Size / 2);
+    }
+
+    void SetOrthCamSize()
+    {
+        float mazeSizeRatio = (float)SizeX / (float)SizeY;
+
+        //Sets Orthographio Camera size based on Maze Size
+        if (mazeSizeRatio < Camera.main.aspect)
+            Camera.main.orthographicSize = (float)SizeY/2;
+        else
+            Camera.main.orthographicSize = ((float)SizeX/2) / Camera.main.aspect;
+
+        if (SizeX > SizeY)
+            Camera.main.farClipPlane = (float)SizeX * 2;
+        else
+            Camera.main.farClipPlane = (float)SizeY * 2;
     }
 
     public void RestartGame()
@@ -75,4 +95,6 @@ public class Maze : MonoBehaviour
             }
         }
     }
+
+
 }
