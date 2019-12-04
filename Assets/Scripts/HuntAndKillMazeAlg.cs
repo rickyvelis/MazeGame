@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using UnityEngine;
 
 public class HuntAndKillMazeAlgorithm : MazeAlgorithm
 {
@@ -7,7 +7,6 @@ public class HuntAndKillMazeAlgorithm : MazeAlgorithm
     private int _currRow = 0;
     private int _currColumn = 0;
     private Renderer _rend;
-
 
     public HuntAndKillMazeAlgorithm(MazeCell[,] mazeCells, float delay) : base(mazeCells, delay) { }
 
@@ -56,7 +55,7 @@ public class HuntAndKillMazeAlgorithm : MazeAlgorithm
                 _rend = _cells[_currRow, _currColumn].GetComponent<Renderer>();
                 _rend.material.color = Color.white;
                 yield return delay;
-            } 
+            }
 
             Hunt(); // Finds the next unvisited cell with an adjacent visited cell. If it can't find any, it sets courseComplete to true.
         }
@@ -139,7 +138,7 @@ public class HuntAndKillMazeAlgorithm : MazeAlgorithm
 
         while (!wallDestroyed)
         {
-            int direction = Random.Range (1, 5);
+            int direction = Random.Range(1, 5);
 
             if (direction == 1 && row > 0 && _cells[row - 1, column].visited)
             {

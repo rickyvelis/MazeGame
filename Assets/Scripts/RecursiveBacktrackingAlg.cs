@@ -16,7 +16,6 @@ public class RecursiveBacktrackingAlg : MazeAlgorithm
     private int _currRow, _currColumn;
     private Renderer _rend;
 
-
     public RecursiveBacktrackingAlg(MazeCell[,] mazeCells, float delay) : base(mazeCells, delay) { }
 
 
@@ -33,12 +32,10 @@ public class RecursiveBacktrackingAlg : MazeAlgorithm
         WaitForSeconds delay = new WaitForSeconds(_stepDelay);
         _lastDirections = new Stack<Direction>();
 
-
         //1. Choose a random cell to start.
         _currRow = Random.Range(0, _mazeRows);
         _currColumn = Random.Range(0, _mazeColumns);
         _cells[_currRow, _currColumn].visited = true;
-        Debug.Log("Starting at " + _cells[_currRow, _currColumn].name);
 
         _rend = _cells[_currRow, _currColumn].GetComponent<Renderer>();
         _rend.material.color = Color.gray;
@@ -49,10 +46,9 @@ public class RecursiveBacktrackingAlg : MazeAlgorithm
             VisitNeighbour();
         }
     }
-    
-    private bool VisitNeighbour()
+
+    private void VisitNeighbour()
     {
-        bool success = false;
         int neighbCount = 0;
         int[] availableDirections = new int[4];
 
@@ -79,56 +75,47 @@ public class RecursiveBacktrackingAlg : MazeAlgorithm
 
         if (neighbCount > 0)
         {
-            success = true;
-
             int rand = Random.Range(0, neighbCount);
             Direction dir = (Direction)availableDirections[rand];
             _lastDirections.Push(dir);
-            Debug.Log("GOING " + dir);
 
-            if (dir == Direction.North)
+            switch (dir)
             {
-                _cells[_currRow - 1, _currColumn].visited = true;
-                DestroyWallIfItExists(_cells[_currRow - 1, _currColumn].southWall);
-                _currRow--;
-            } 
-            else if (dir == Direction.South)
-            {
-                _cells[_currRow + 1, _currColumn].visited = true;
-                DestroyWallIfItExists(_cells[_currRow, _currColumn].southWall);
-                _currRow++;
-            }
-            else if (dir == Direction.East)
-            {
-                _cells[_currRow, _currColumn + 1].visited = true;
-                DestroyWallIfItExists(_cells[_currRow, _currColumn].eastWall);
-                _currColumn++;
-            }
-            else if (dir == Direction.West)
-            {
-                _cells[_currRow, _currColumn - 1].visited = true;
-                DestroyWallIfItExists(_cells[_currRow, _currColumn - 1].eastWall);
-                _currColumn--;
+                case Direction.North:
+                    _cells[_currRow - 1, _currColumn].visited = true;
+                    DestroyWallIfItExists(_cells[_currRow - 1, _currColumn].southWall);
+                    _currRow--;
+                    break;
+                case Direction.South:
+                    _cells[_currRow + 1, _currColumn].visited = true;
+                    DestroyWallIfItExists(_cells[_currRow, _currColumn].southWall);
+                    _currRow++;
+                    break;
+                case Direction.East:
+                    _cells[_currRow, _currColumn + 1].visited = true;
+                    DestroyWallIfItExists(_cells[_currRow, _currColumn].eastWall);
+                    _currColumn++;
+                    break;
+                case Direction.West:
+                    _cells[_currRow, _currColumn - 1].visited = true;
+                    DestroyWallIfItExists(_cells[_currRow, _currColumn - 1].eastWall);
+                    _currColumn--;
+                    break;
             }
             _rend = _cells[_currRow, _currColumn].GetComponent<Renderer>();
-            if (_rend.material.color == Color.gray) _rend.material.color = Color.white;
-            else _rend.material.color = Color.gray;
-            Debug.Log("Visiting " + _cells[_currRow, _currColumn].name);
+            _rend.material.color = _rend.material.color == Color.gray ? Color.white : Color.gray;
 
         }
-        else if(_lastDirections.Count > 0)
+        else if (_lastDirections.Count > 0)
         {
-            _rend = _cells[_currRow, _currColumn].GetComponent<Renderer>();
-            _rend.material.color = Color.white;
+            _cells[_currRow, _currColumn].GetComponent<Renderer>().material.color = Color.white;
             Backtrack();
         }
         else
         {
-            _rend = _cells[_currRow, _currColumn].GetComponent<Renderer>();
-            _rend.material.color = Color.white;
+            _cells[_currRow, _currColumn].GetComponent<Renderer>().material.color = Color.white;
             CourseComplete = true;
         }
-        return success;
     }
 
     private void Backtrack()
@@ -142,14 +129,13 @@ public class RecursiveBacktrackingAlg : MazeAlgorithm
 
     private void DestroyWallIfItExists(GameObject wall)
     {
-        if (wall != null) GameObject.Destroy(wall);
+        if (wall != null) Object.Destroy(wall);
     }
 
-    private bool CellIsAvailable(int row, int column)
-    {
-        if (row >= 0 && row < _mazeRows && column >= 0 && column < _mazeColumns && !_cells[row, column].visited)
-            return true;
-        else
-            return false;
-    }
+    private bool CellIsAvailable(int row, int column) =>
+        row >= 0
+        && row < _mazeRows
+        && column >= 0
+        && column < _mazeColumns
+        && !_cells[row, column].visited;
 }

@@ -1,6 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 public abstract class MazeAlgorithm
 {
@@ -16,6 +14,6 @@ public abstract class MazeAlgorithm
         _mazeColumns = mazeCells.GetLength(1);
         _stepDelay = delay;
     }
-    
+
     public abstract IEnumerator Generate();
 }

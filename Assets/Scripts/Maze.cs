@@ -1,13 +1,13 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using TMPro;
 using UnityEngine;
 
 public class Maze : MonoBehaviour
 {
-    public int SizeX, SizeY;
-    public float Size = 1.0f;
+    public TMP_InputField InputX, InputY;
     public MazeCell Cell;
     public GameObject Wall;
+    public int SizeX, SizeY;
+    public float Size = 1.0f;
     public float GenerationStepDelay;
 
     private MazeCell[,] _cells;
@@ -15,17 +15,32 @@ public class Maze : MonoBehaviour
 
     private MazeAlgorithm _ma;
 
-    //VARS vor camera
+    private bool _firstTimeGenerate = true;
+    
 
-
-    public void Start()
+    public void StartGame()
     {
-        BeginGame();
+        if (!int.TryParse(InputX.text, out SizeX)) SizeX = 5;
+        if (!int.TryParse(InputY.text, out SizeY)) SizeY = 5;
+        if (SizeX == 0) SizeX = 2;
+        if (SizeY == 0) SizeY = 2;
+
+        if (_firstTimeGenerate)
+        {
+            BeginGame();
+            _firstTimeGenerate = false;
+        }
+        else
+            RestartGame();
     }
 
     public void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space)) RestartGame();
+        if (!_firstTimeGenerate)
+            if (_ma.CourseComplete)
+            {
+                //Play the actual game
+            }
     }
 
     public void BeginGame()
@@ -34,24 +49,20 @@ public class Maze : MonoBehaviour
         _ma = new RecursiveBacktrackingAlg(_cells, GenerationStepDelay);
         //_ma = new HuntAndKillMazeAlgorithm(_cells, GenerationStepDelay);
         StartCoroutine(_ma.Generate());
-        if (_ma.CourseComplete)
-        {
-            //Play the actual game
-        }
 
         SetOrthCamSize();
-        transform.position = new Vector3((Size * SizeX / 2) - Size/2, 0.0f, (Size * SizeY / 2) - Size / 2);
+        transform.position = new Vector3((Size * SizeX / 2) - Size / 2, 0.0f, (Size * SizeY / 2) - Size / 2);
     }
 
     void SetOrthCamSize()
     {
-        float mazeSizeRatio = (float)SizeX / (float)SizeY;
+        float mazeSizeRatio = SizeX / SizeY;
 
         //Sets Orthographio Camera size based on Maze Size
         if (mazeSizeRatio < Camera.main.aspect)
-            Camera.main.orthographicSize = (float)SizeY/2;
+            Camera.main.orthographicSize = ((float)SizeY / 2);
         else
-            Camera.main.orthographicSize = ((float)SizeX/2) / Camera.main.aspect;
+            Camera.main.orthographicSize = ((float)SizeX / 2 / Camera.main.aspect);
 
         if (SizeX > SizeY)
             Camera.main.farClipPlane = (float)SizeX * 2;
@@ -70,9 +81,8 @@ public class Maze : MonoBehaviour
     {
         _mazeContainer = new GameObject() { name = "MazeContainer" };
         _cells = new MazeCell[SizeX, SizeY];
-        
+
         for (int x = 0; x < SizeX; x++)
-        {
             for (int y = 0; y < SizeY; y++)
             {
                 _cells[x, y] = Instantiate(Cell, new Vector3(x * Size, 0, y * Size), Quaternion.Euler(90.0f, 0.0f, 0.0f), _mazeContainer.transform) as MazeCell;
@@ -93,7 +103,6 @@ public class Maze : MonoBehaviour
                 _cells[x, y].southWall = Instantiate(Wall, new Vector3((x * Size) + (Size / 2f), 0.5f, y * Size), Quaternion.Euler(0.0f, 90.0f, 0.0f), _cells[x, y].transform) as GameObject;
                 _cells[x, y].southWall.name = "South Wall " + x + "," + y;
             }
-        }
     }
 
 
