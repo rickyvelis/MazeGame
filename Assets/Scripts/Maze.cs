@@ -54,6 +54,14 @@ public class Maze : MonoBehaviour
         transform.position = new Vector3((Size * SizeX / 2) - Size / 2, 0.0f, (Size * SizeY / 2) - Size / 2);
     }
 
+    public void RestartGame()
+    {
+        GameObject.Destroy(_mazeContainer);
+        StopAllCoroutines();
+        BeginGame();
+    }
+
+
     void SetOrthCamSize()
     {
         float mazeSizeRatio = SizeX / SizeY;
@@ -62,7 +70,7 @@ public class Maze : MonoBehaviour
         if (mazeSizeRatio < Camera.main.aspect)
             Camera.main.orthographicSize = ((float)SizeY / 2);
         else
-            Camera.main.orthographicSize = ((float)SizeX / 2 / Camera.main.aspect);
+            Camera.main.orthographicSize = (float)SizeX / 2 / Camera.main.aspect;
 
         if (SizeX > SizeY)
             Camera.main.farClipPlane = (float)SizeX * 2;
@@ -70,12 +78,6 @@ public class Maze : MonoBehaviour
             Camera.main.farClipPlane = (float)SizeY * 2;
     }
 
-    public void RestartGame()
-    {
-        GameObject.Destroy(_mazeContainer);
-        StopAllCoroutines();
-        BeginGame();
-    }
 
     private void CreateGrid()
     {
