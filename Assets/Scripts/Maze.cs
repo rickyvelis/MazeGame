@@ -50,7 +50,7 @@ public class Maze : MonoBehaviour
         //_ma = new HuntAndKillMazeAlgorithm(_cells, GenerationStepDelay);
         StartCoroutine(_ma.Generate());
 
-        SetOrthCamSize();
+        ConfigureOrthCam();
         transform.position = new Vector3((Size * SizeX / 2) - Size / 2, 0.0f, (Size * SizeY / 2) - Size / 2);
     }
 
@@ -61,24 +61,29 @@ public class Maze : MonoBehaviour
         BeginGame();
     }
 
-
-    void SetOrthCamSize()
+    /// <summary>
+    /// Adjusts the Size and farClipPlane properties of the Camera, so the maze will fill the screen correctly.
+    /// </summary>
+    private void ConfigureOrthCam()
     {
         float mazeSizeRatio = SizeX / SizeY;
 
-        //Sets Orthographio Camera size based on Maze Size
-        if (mazeSizeRatio < Camera.main.aspect)
-            Camera.main.orthographicSize = ((float)SizeY / 2);
-        else
+        //If mazeSizeRatio is bigger than the Camera's aspect ratio, base the Camera's Orthograpic size on the wisth (SizeX) of the Maze.
+        if (mazeSizeRatio > Camera.main.aspect)
             Camera.main.orthographicSize = (float)SizeX / 2 / Camera.main.aspect;
+        else
+            Camera.main.orthographicSize = (float)SizeY / 2;
 
+        //Sets Camera's Far Clipping Plane depending on the biggest Dimension of the maze
         if (SizeX > SizeY)
             Camera.main.farClipPlane = (float)SizeX * 2;
         else
             Camera.main.farClipPlane = (float)SizeY * 2;
     }
 
-
+    /// <summary>
+    /// Creates and instantiates every Cell and Wall object to create a grid.
+    /// </summary>
     private void CreateGrid()
     {
         _mazeContainer = new GameObject() { name = "MazeContainer" };
