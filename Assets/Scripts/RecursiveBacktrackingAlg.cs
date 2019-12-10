@@ -2,14 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum Direction
-{
-    North,
-    East,
-    South,
-    West
-}
-
 public class RecursiveBacktrackingAlg : MazeAlgorithm
 {
     private Stack<Direction> _lastDirections;
@@ -36,7 +28,6 @@ public class RecursiveBacktrackingAlg : MazeAlgorithm
         _currRow = Random.Range(0, _mazeRows);
         _currColumn = Random.Range(0, _mazeColumns);
         _cells[_currRow, _currColumn].visited = true;
-
         _rend = _cells[_currRow, _currColumn].GetComponent<Renderer>();
         _rend.material.color = Color.gray;
 
@@ -109,10 +100,8 @@ public class RecursiveBacktrackingAlg : MazeAlgorithm
                     _currColumn--;
                     break;
             }
-            //EXPLAIN
             _rend = _cells[_currRow, _currColumn].GetComponent<Renderer>();
             _rend.material.color = _rend.material.color == Color.gray ? Color.white : Color.gray;
-
         }
         //3. If all adjacent cells have been visited, back up to the previous cell.
         else if (_lastDirections.Count > 0)
@@ -149,7 +138,7 @@ public class RecursiveBacktrackingAlg : MazeAlgorithm
     }
 
     /// <summary>
-    /// Checks if the cell at the given location is within the Maze and if the cell is unvisited.
+    /// Checks if the cell at the given location exists within the Maze and if the cell is unvisited.
     /// </summary>
     /// <param name="row">The row the cell is in.</param>
     /// <param name="column">The column the cell is in.</param>

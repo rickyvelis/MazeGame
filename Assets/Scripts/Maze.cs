@@ -46,8 +46,8 @@ public class Maze : MonoBehaviour
     public void BeginGame()
     {
         CreateGrid();
-        _ma = new RecursiveBacktrackingAlg(_cells, GenerationStepDelay);
-        //_ma = new HuntAndKillMazeAlgorithm(_cells, GenerationStepDelay);
+        //_ma = new RecursiveBacktrackingAlg(_cells, GenerationStepDelay);
+        _ma = new HuntAndKillAlg(_cells, GenerationStepDelay);
         StartCoroutine(_ma.Generate());
 
         ConfigureOrthCam();
@@ -70,9 +70,9 @@ public class Maze : MonoBehaviour
 
         //If mazeSizeRatio is bigger than the Camera's aspect ratio, base the Camera's Orthograpic size on the wisth (SizeX) of the Maze.
         if (mazeSizeRatio > Camera.main.aspect)
-            Camera.main.orthographicSize = (float)SizeX / 2 / Camera.main.aspect;
+            Camera.main.orthographicSize = (float)SizeX / 2;
         else
-            Camera.main.orthographicSize = (float)SizeY / 2;
+            Camera.main.orthographicSize = (float)SizeY / 2 / Camera.main.aspect;
 
         //Sets Camera's Far Clipping Plane depending on the biggest Dimension of the maze
         if (SizeX > SizeY)
