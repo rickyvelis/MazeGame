@@ -1,9 +1,10 @@
 ﻿using TMPro;
 using UnityEngine;
 
-public class Maze : MonoBehaviour
+public class GameManager : MonoBehaviour
 {
     public TMP_InputField InputX, InputY;
+    public TMP_Dropdown DropdownAlg;
     public MazeCell Cell;
     public GameObject Wall;
     public int SizeX, SizeY;
@@ -20,6 +21,7 @@ public class Maze : MonoBehaviour
 
     public void StartGame()
     {
+        //Get the given X and Y sizes of the maze from the InputFields
         if (!int.TryParse(InputX.text, out SizeX)) SizeX = 5;
         if (!int.TryParse(InputY.text, out SizeY)) SizeY = 5;
         if (SizeX == 0) SizeX = 2;
@@ -36,28 +38,47 @@ public class Maze : MonoBehaviour
 
     public void Update()
     {
-        if (!_firstTimeGenerate)
-            if (_ma.CourseComplete)
-            {
-                //Play the actual game
-            }
+        //if (!_firstTimeGenerate)
+        //    if (_ma != null &&_ma.CourseComplete)
+        //    {
+        //        //Play the actual game
+        //    }
     }
 
+    /// <summary>
+    /// TODO
+    /// </summary>
     public void BeginGame()
     {
+        //Create a grid of walls and cells
         CreateGrid();
-        //_ma = new RecursiveBacktrackingAlg(_cells, GenerationStepDelay);
-        _ma = new HuntAndKillAlg(_cells, GenerationStepDelay);
-        StartCoroutine(_ma.Generate());
 
+        //Pick an algorithm for generating the maze
+        AlgorithmPicker(DropdownAlg.value);
+
+        //Generate the maze with the chosen algorithm
+        if (_ma != null) 
+            StartCoroutine(_ma.Generate());
+
+        //Adjust the size and far clipping plane of the orthographic camera
         ConfigureOrthCam();
+
+        //Set the position of GameManager to the center of the generated maze, so the camera (its child) will be at the center as well
         transform.position = new Vector3((Size * SizeX / 2) - Size / 2, 0.0f, (Size * SizeY / 2) - Size / 2);
     }
 
+    /// <summary>
+    /// TODO
+    /// </summary>
     public void RestartGame()
     {
+        //Destroy the whole maze
         GameObject.Destroy(_mazeContainer);
+
+        //Stop all the running coroutines
         StopAllCoroutines();
+
+        //Start a new game
         BeginGame();
     }
 
@@ -66,13 +87,13 @@ public class Maze : MonoBehaviour
     /// </summary>
     private void ConfigureOrthCam()
     {
-        float mazeSizeRatio = SizeX / SizeY;
+        float mazeSizeRatio = (float)SizeY / (float)SizeX;
 
         //If mazeSizeRatio is bigger than the Camera's aspect ratio, base the Camera's Orthograpic size on the wisth (SizeX) of the Maze.
-        if (mazeSizeRatio > Camera.main.aspect)
+        if (mazeSizeRatio < Camera.main.aspect)
             Camera.main.orthographicSize = (float)SizeX / 2;
         else
-            Camera.main.orthographicSize = (float)SizeY / 2 / Camera.main.aspect;
+            Camera.main.orthographicSize = ((float)SizeY / 2) / Camera.main.aspect;
 
         //Sets Camera's Far Clipping Plane depending on the biggest Dimension of the maze
         if (SizeX > SizeY)
@@ -112,5 +133,25 @@ public class Maze : MonoBehaviour
             }
     }
 
-
+    /// <summary>
+    /// Picks the algorithm to be used to generate a maze with.
+    /// </summary>
+    /// <param name="index">The index given to an algorithm.</param>
+    private void AlgorithmPicker(int index)
+    {
+        switch (index)
+        {
+            case 0:
+                _ma = new RecursiveBacktrackingAlg(_cells, GenerationStepDelay);
+                break;
+            case 1:
+                _ma = new HuntAndKillAlg(_cells, GenerationStepDelay);
+                break;
+            //case 2:
+            //    return _ma = new ThirdNonexistantAlgorithm(_cells, GenerationStepDelay);
+            default:
+                Debug.LogError("No algorithm selected.");
+                break;
+        }
+    }
 }
