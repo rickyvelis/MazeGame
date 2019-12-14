@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
 
-public class PlayerScript : MonoBehaviour
+public class PlayerMovement : MonoBehaviour
 {
-    public float moveSpeed;
+    public Rigidbody rb;
+    public float moveSpeed = 5;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -10,11 +12,18 @@ public class PlayerScript : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         transform.Translate(
             Input.GetAxisRaw("Horizontal") * Time.deltaTime * moveSpeed,
             0,
             Input.GetAxisRaw("Vertical") * Time.deltaTime * moveSpeed);
+    }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Wall"))
+        {
+            rb.velocity = Vector3.zero;
+        }
     }
 }

@@ -21,7 +21,7 @@ public class GameManager : MonoBehaviour
 
     public void StartGame()
     {
-        //Get the given X and Y sizes of the maze from the InputFields
+        // Get the given X and Y sizes of the maze from the InputFields
         if (!int.TryParse(InputX.text, out SizeX)) SizeX = 5;
         if (!int.TryParse(InputY.text, out SizeY)) SizeY = 5;
         if (SizeX == 0) SizeX = 2;
@@ -50,20 +50,28 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void BeginGame()
     {
-        //Create a grid of walls and cells
+        // Create a grid of walls and cells
         CreateGrid();
 
-        //Pick an algorithm for generating the maze
+        // Pick an algorithm for generating the maze
         AlgorithmPicker(DropdownAlg.value);
 
-        //Generate the maze with the chosen algorithm
-        if (_ma != null) 
-            StartCoroutine(_ma.Generate());
+        // Generate the maze with the chosen algorithm
+        if (_ma != null) StartCoroutine(_ma.Generate());
 
-        //Adjust the size and far clipping plane of the orthographic camera
+        //for (int x = 0; x < _cells.GetLength(0); x++)
+        //{
+        //    for (int y = 0; y < _cells.GetLength(1); y++)
+        //    {
+        //        _cells[x, y].transform.DetachChildren();
+
+        //    }
+        //}
+
+        // Adjust the size and far clipping plane of the orthographic camera
         ConfigureOrthCam();
 
-        //Set the position of GameManager to the center of the generated maze, so the camera (its child) will be at the center as well
+        // Set the position of GameManager to the center of the generated maze, so the camera (its child) will be at the center as well
         transform.position = new Vector3((Size * SizeX / 2) - Size / 2, 0.0f, (Size * SizeY / 2) - Size / 2);
     }
 
@@ -87,13 +95,13 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void ConfigureOrthCam()
     {
-        float mazeSizeRatio = (float)SizeY / (float)SizeX;
+        float mazeSizeRatio = (float)SizeX / (float)SizeY;
 
-        //If mazeSizeRatio is bigger than the Camera's aspect ratio, base the Camera's Orthograpic size on the wisth (SizeX) of the Maze.
+        // If mazeSizeRatio is bigger than the Camera's aspect ratio, base the Camera's Orthograpic size on the wisth (SizeX) of the Maze.
         if (mazeSizeRatio < Camera.main.aspect)
-            Camera.main.orthographicSize = (float)SizeX / 2;
+            Camera.main.orthographicSize = ((float)SizeY / 2);
         else
-            Camera.main.orthographicSize = ((float)SizeY / 2) / Camera.main.aspect;
+            Camera.main.orthographicSize = ((float)SizeX / 2) / Camera.main.aspect;
 
         //Sets Camera's Far Clipping Plane depending on the biggest Dimension of the maze
         if (SizeX > SizeY)
@@ -118,18 +126,18 @@ public class GameManager : MonoBehaviour
 
                 if (y == 0)
                 {
-                    _cells[x, y].westWall = Instantiate(Wall, new Vector3(x * Size, 0.5f, (y * Size) - (Size / 2f)), Quaternion.identity, _cells[x, y].transform) as GameObject;
-                    _cells[x, y].westWall.name = "West Wall " + x + "," + y;
+                    _cells[x, y].southWall = Instantiate(Wall, new Vector3(x * Size, 0.5f, (y * Size) - (Size / 2f)), Quaternion.identity, _cells[x, y].transform) as GameObject;
+                    _cells[x, y].southWall.name = "South Wall " + x + "," + y;
                 }
-                _cells[x, y].eastWall = Instantiate(Wall, new Vector3(x * Size, 0.5f, (y * Size) + (Size / 2f)), Quaternion.identity, _cells[x, y].transform) as GameObject;
-                _cells[x, y].eastWall.name = "East Wall " + x + "," + y;
+                _cells[x, y].northWall = Instantiate(Wall, new Vector3(x * Size, 0.5f, (y * Size) + (Size / 2f)), Quaternion.identity, _cells[x, y].transform) as GameObject;
+                _cells[x, y].northWall.name = "North Wall " + x + "," + y;
                 if (x == 0)
                 {
-                    _cells[x, y].northWall = Instantiate(Wall, new Vector3((x * Size) - (Size / 2f), 0.5f, y * Size), Quaternion.Euler(0.0f, 90.0f, 0.0f), _cells[x, y].transform) as GameObject;
-                    _cells[x, y].northWall.name = "North Wall " + x + "," + y;
+                    _cells[x, y].westWall = Instantiate(Wall, new Vector3((x * Size) - (Size / 2f), 0.5f, y * Size), Quaternion.Euler(0.0f, 90.0f, 0.0f), _cells[x, y].transform) as GameObject;
+                    _cells[x, y].westWall.name = "West Wall " + x + "," + y;
                 }
-                _cells[x, y].southWall = Instantiate(Wall, new Vector3((x * Size) + (Size / 2f), 0.5f, y * Size), Quaternion.Euler(0.0f, 90.0f, 0.0f), _cells[x, y].transform) as GameObject;
-                _cells[x, y].southWall.name = "South Wall " + x + "," + y;
+                _cells[x, y].eastWall = Instantiate(Wall, new Vector3((x * Size) + (Size / 2f), 0.5f, y * Size), Quaternion.Euler(0.0f, 90.0f, 0.0f), _cells[x, y].transform) as GameObject;
+                _cells[x, y].eastWall.name = "East Wall " + x + "," + y;
             }
     }
 

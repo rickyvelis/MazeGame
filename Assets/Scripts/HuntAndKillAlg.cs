@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class HuntAndKillAlg : MazeAlgorithm
 {
-    private int _currRow, _currColumn;
+    private int _currX, _currY;
     private Renderer _rend;
 
     public HuntAndKillAlg(MazeCell[,] mazeCells, float delay) : base(mazeCells, delay) { }
@@ -20,23 +20,22 @@ public class HuntAndKillAlg : MazeAlgorithm
 
     public override IEnumerator Generate()
     {
-        WaitForSeconds delay = new WaitForSeconds(_stepDelay);
-
         //1. Choose a random cell to start.
-        _currRow = Random.Range(0, _mazeRows);
-        _currColumn = Random.Range(0, _mazeColumns);
-        _cells[_currRow, _currColumn].visited = true;
-        _rend = _cells[_currRow, _currColumn].GetComponent<Renderer>();
+        _currX = Random.Range(0, _mazeColumns);
+        _currY = Random.Range(0, _mazeRows);
+        _cells[_currX, _currY].visited = true;
+        _rend = _cells[_currX, _currY].GetComponent<Renderer>();
         _rend.material.color = Color.white;
 
         while (!CourseComplete)
         {
-            yield return delay;
+            yield return _stepDelay;
             if (!Kill()) // Will return true until it hits a dead end.
             {
-                Hunt();  // Finds the next unvisited cell with an adjacent visited cell. If it can't find any, it sets courseComplete to true.
+                yield return Hunt();  // Finds the next unvisited cell with an adjacent visited cell. If it can't find any, it sets courseComplete to true.
             }
         }
+        Debug.Log("DONE GENERATING");
     }
 
     private bool Kill()
@@ -45,22 +44,22 @@ public class HuntAndKillAlg : MazeAlgorithm
         int[] availableDirections = new int[4];
 
         //This set of four if-statements checks and counts all the available neighbours.
-        if (_currRow > 0 && CellIsAvailable(_currRow - 1, _currColumn, false))
+        if (_currY < _mazeRows && CellIsAvailable(_currX, _currY + 1, false))
         {
             availableDirections[neighbCount] = (int)Direction.North;
             neighbCount++;
         }
-        if (_currRow < _mazeRows && CellIsAvailable(_currRow + 1, _currColumn, false))
+        if (_currY > 0 && CellIsAvailable(_currX, _currY - 1, false))
         {
             availableDirections[neighbCount] = (int)Direction.South;
             neighbCount++;
         }
-        if (_currColumn > 0 && CellIsAvailable(_currRow, _currColumn - 1, false))
+        if (_currX > 0 && CellIsAvailable(_currX - 1, _currY, false))
         {
             availableDirections[neighbCount] = (int)Direction.West;
             neighbCount++;
         }
-        if (_currColumn < _mazeColumns && CellIsAvailable(_currRow, _currColumn + 1, false))
+        if (_currX < _mazeColumns && CellIsAvailable(_currX + 1, _currY, false))
         {
             availableDirections[neighbCount] = (int)Direction.East;
             neighbCount++;
@@ -71,7 +70,7 @@ public class HuntAndKillAlg : MazeAlgorithm
         //the neighbour the new current cell.
         if (neighbCount > 0)
         {
-            _rend = _cells[_currRow, _currColumn].GetComponent<Renderer>();
+            _rend = _cells[_currX, _currY].GetComponent<Renderer>();
             _rend.material.color = Color.white;
 
             int rand = Random.Range(0, neighbCount);
@@ -80,100 +79,106 @@ public class HuntAndKillAlg : MazeAlgorithm
             switch (dir)
             {
                 case Direction.North:
-                    _cells[_currRow - 1, _currColumn].visited = true;
-                    DestroyWallIfItExists(_cells[_currRow - 1, _currColumn].southWall);
-                    _currRow--;
+                    _cells[_currX, _currY + 1].visited = true;
+                    DestroyWallIfItExists(_cells[_currX, _currY].northWall);
+                    _currY++;
                     break;
                 case Direction.South:
-                    _cells[_currRow + 1, _currColumn].visited = true;
-                    DestroyWallIfItExists(_cells[_currRow, _currColumn].southWall);
-                    _currRow++;
+                    _cells[_currX, _currY - 1].visited = true;
+                    DestroyWallIfItExists(_cells[_currX, _currY - 1].northWall);
+                    _currY--;
                     break;
                 case Direction.East:
-                    _cells[_currRow, _currColumn + 1].visited = true;
-                    DestroyWallIfItExists(_cells[_currRow, _currColumn].eastWall);
-                    _currColumn++;
+                    _cells[_currX + 1, _currY].visited = true;
+                    DestroyWallIfItExists(_cells[_currX, _currY].eastWall);
+                    _currX++;
                     break;
                 case Direction.West:
-                    _cells[_currRow, _currColumn - 1].visited = true;
-                    DestroyWallIfItExists(_cells[_currRow, _currColumn - 1].eastWall);
-                    _currColumn--;
+                    _cells[_currX - 1, _currY].visited = true;
+                    DestroyWallIfItExists(_cells[_currX - 1, _currY].eastWall);
+                    _currX--;
                     break;
             }
-            _rend = _cells[_currRow, _currColumn].GetComponent<Renderer>();
+            _rend = _cells[_currX, _currY].GetComponent<Renderer>();
             _rend.material.color = Color.green;
-
             return true;
         }
         else
         {
-            _rend = _cells[_currRow, _currColumn].GetComponent<Renderer>();
+            _rend = _cells[_currX, _currY].GetComponent<Renderer>();
             _rend.material.color = Color.white;
             return false;
         }
     }
 
-    private void Hunt()
+    private IEnumerator Hunt()
     {
         CourseComplete = true; // Set it to this, and see if we can prove otherwise below.
+        int lastX = int.MaxValue;
+        int lastY = int.MaxValue;
 
-        for (int x = 0; x < _mazeRows; x++)
+        for (int y = _mazeRows - 1; y >= 0; y--) // From top to bottom
         {
-            for (int y = 0; y < _mazeColumns; y++)
+            for (int x = 0; x < _mazeColumns; x++) // From left to right
             {
+                _rend = _cells[x, y].GetComponent<Renderer>();
+                _rend.material.color = Color.yellow;
+
+                if (lastX < _mazeColumns && lastY < _mazeRows)
+                {
+                    _rend = _cells[lastX, lastY].GetComponent<Renderer>();
+                    if (_cells[lastX, lastY].visited) _rend.material.color = Color.white;
+                    else _rend.material.color = _cells[lastX, lastY].startColor;
+                }
+
+                lastX = x;
+                lastY = y;
+
+
                 if (!_cells[x, y].visited)
                 {
                     int neighbCount = 0;
                     Direction[] availableDirections = new Direction[4];
 
                     //This set of four if-statements checks and counts all the available neighbours.
-                    if (x > 0 && CellIsAvailable(x - 1, y, true))
-                    {
-                        availableDirections[neighbCount] = Direction.North;
-                        neighbCount++;
-                    }
-                    if (x < _mazeRows && CellIsAvailable(x + 1, y, true))
-                    {
-                        availableDirections[neighbCount] = Direction.South;
-                        neighbCount++;
-                    }
+                    if (y < _mazeRows && CellIsAvailable(x, y + 1, true))
+                        availableDirections[neighbCount++] = Direction.North;
                     if (y > 0 && CellIsAvailable(x, y - 1, true))
-                    {
-                        availableDirections[neighbCount] = Direction.West;
-                        neighbCount++;
-                    }
-                    if (y < _mazeColumns && CellIsAvailable(x, y + 1, true))
-                    {
-                        availableDirections[neighbCount] = Direction.East;
-                        neighbCount++;
-                    }
+                        availableDirections[neighbCount++] = Direction.South;
+                    if (x > 0 && CellIsAvailable(x - 1, y, true))
+                        availableDirections[neighbCount++] = Direction.West;
+                    if (x < _mazeColumns && CellIsAvailable(x + 1, y, true))
+                        availableDirections[neighbCount++] = Direction.East;
 
                     if (neighbCount > 0)
                     {
                         CourseComplete = false; // Yep, we found something so definitely do another Kill cycle.
-                        _currRow = x;
-                        _currColumn = y;
-                        _cells[_currRow, _currColumn].visited = true;
-                        _rend = _cells[_currRow, _currColumn].GetComponent<Renderer>();
+                        _currX = x;
+                        _currY = y;
+                        _cells[_currX, _currY].visited = true;
+                        _rend = _cells[_currX, _currY].GetComponent<Renderer>();
                         _rend.material.color = Color.white;
 
                         int rand = Random.Range(0, neighbCount);
                         Direction dir = availableDirections[rand];
 
                         if(dir == Direction.North)
-                            DestroyWallIfItExists(_cells[_currRow - 1, _currColumn].southWall);
+                            DestroyWallIfItExists(_cells[_currX, _currY].northWall);
                         else if(dir == Direction.South)
-                            DestroyWallIfItExists(_cells[_currRow, _currColumn].southWall);
+                            DestroyWallIfItExists(_cells[_currX, _currY - 1].northWall);
                         else if(dir == Direction.East)
-                            DestroyWallIfItExists(_cells[_currRow, _currColumn].eastWall);
+                            DestroyWallIfItExists(_cells[_currX, _currY].eastWall);
                         else if(dir == Direction.West)
-                            DestroyWallIfItExists(_cells[_currRow, _currColumn - 1].eastWall);
+                            DestroyWallIfItExists(_cells[_currX - 1, _currY].eastWall);
 
-                        return;
+                        yield break;
                     }
                 }
+                yield return _stepDelay;
             }
         }
+        _rend = _cells[_mazeColumns - 1, 0].GetComponent<Renderer>();
+        _rend.material.color = Color.white;
     }
 
     /// <summary>
@@ -188,14 +193,14 @@ public class HuntAndKillAlg : MazeAlgorithm
     /// <summary>
     /// Checks if the cell at the given location is within the Maze and if the cell is unvisited or not.
     /// </summary>
-    /// <param name="row">The row the cell is in.</param>
-    /// <param name="column">The column the cell is in.</param>
+    /// <param name="x">The row the cell is in.</param>
+    /// <param name="y">The column the cell is in.</param>
     /// <param name="visited">Condition if the cell must be visited or not.</param>
     /// <returns>Visitability.</returns>
-    private bool CellIsAvailable(int row, int column, bool visited) =>
-        row >= 0
-        && row < _mazeRows
-        && column >= 0
-        && column < _mazeColumns
-        && _cells[row, column].visited == visited;
+    private bool CellIsAvailable(int x, int y, bool visited) =>
+        x >= 0
+        && x < _mazeColumns
+        && y >= 0
+        && y < _mazeRows
+        && _cells[x, y].visited == visited;
 }

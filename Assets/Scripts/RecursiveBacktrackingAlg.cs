@@ -5,7 +5,7 @@ using UnityEngine;
 public class RecursiveBacktrackingAlg : MazeAlgorithm
 {
     private Stack<Direction> _lastDirections;
-    private int _currRow, _currColumn;
+    private int _currX, _currY;
     private Renderer _rend;
 
     public RecursiveBacktrackingAlg(MazeCell[,] mazeCells, float delay) : base(mazeCells, delay) { }
@@ -21,21 +21,21 @@ public class RecursiveBacktrackingAlg : MazeAlgorithm
     /// </summary>
     public override IEnumerator Generate()
     {
-        WaitForSeconds delay = new WaitForSeconds(_stepDelay);
         _lastDirections = new Stack<Direction>();
 
         //1. Choose a random cell to start.
-        _currRow = Random.Range(0, _mazeRows);
-        _currColumn = Random.Range(0, _mazeColumns);
-        _cells[_currRow, _currColumn].visited = true;
-        _rend = _cells[_currRow, _currColumn].GetComponent<Renderer>();
+        _currX = Random.Range(0, _mazeColumns);
+        _currY = Random.Range(0, _mazeRows);
+        _cells[_currX, _currY].visited = true;
+        _rend = _cells[_currX, _currY].GetComponent<Renderer>();
         _rend.material.color = Color.gray;
 
         while (!CourseComplete)
         {
-            yield return delay;
+            yield return _stepDelay;
             VisitNeighbour();
         }
+        Debug.Log("DONE GENERATING");
     }
 
     /// <summary>
@@ -47,26 +47,14 @@ public class RecursiveBacktrackingAlg : MazeAlgorithm
         int[] availableDirections = new int[4];
 
         //This set of four if-statements checks and counts all the available neighbours.
-        if (_currRow > 0 && CellIsAvailable(_currRow - 1, _currColumn))
-        {
-            availableDirections[neighbCount] = (int)Direction.North;
-            neighbCount++;
-        }
-        if (_currRow < _mazeRows && CellIsAvailable(_currRow + 1, _currColumn))
-        {
-            availableDirections[neighbCount] = (int)Direction.South;
-            neighbCount++;
-        }
-        if (_currColumn > 0 && CellIsAvailable(_currRow, _currColumn - 1))
-        {
-            availableDirections[neighbCount] = (int)Direction.West;
-            neighbCount++;
-        }
-        if (_currColumn < _mazeColumns && CellIsAvailable(_currRow, _currColumn + 1))
-        {
-            availableDirections[neighbCount] = (int)Direction.East;
-            neighbCount++;
-        }
+        if (_currY < _mazeRows && CellIsAvailable(_currX, _currY + 1))
+            availableDirections[neighbCount++] = (int)Direction.North;
+        if (_currY > 0 && CellIsAvailable(_currX, _currY - 1))
+            availableDirections[neighbCount++] = (int)Direction.South;
+        if (_currX > 0 && CellIsAvailable(_currX - 1, _currY))
+            availableDirections[neighbCount++] = (int)Direction.West;
+        if (_currX < _mazeColumns && CellIsAvailable(_currX + 1, _currY))
+            availableDirections[neighbCount++] = (int)Direction.East;
 
         //If there were neighbours found, randomly choose one of the neighbours,
         //set the neighbour as visited, break the wall to the neighbour and make 
@@ -80,38 +68,38 @@ public class RecursiveBacktrackingAlg : MazeAlgorithm
             switch (dir)
             {
                 case Direction.North:
-                    _cells[_currRow - 1, _currColumn].visited = true;
-                    DestroyWallIfItExists(_cells[_currRow - 1, _currColumn].southWall);
-                    _currRow--;
+                    DestroyWallIfItExists(_cells[_currX, _currY].northWall);
+                    _cells[_currX, _currY + 1].visited = true;
+                    _currY++;
                     break;
                 case Direction.South:
-                    _cells[_currRow + 1, _currColumn].visited = true;
-                    DestroyWallIfItExists(_cells[_currRow, _currColumn].southWall);
-                    _currRow++;
+                    DestroyWallIfItExists(_cells[_currX, _currY - 1].northWall);
+                    _cells[_currX, _currY - 1].visited = true;
+                    _currY--;
                     break;
                 case Direction.East:
-                    _cells[_currRow, _currColumn + 1].visited = true;
-                    DestroyWallIfItExists(_cells[_currRow, _currColumn].eastWall);
-                    _currColumn++;
+                    DestroyWallIfItExists(_cells[_currX, _currY].eastWall);
+                    _cells[_currX + 1, _currY].visited = true;
+                    _currX++;
                     break;
                 case Direction.West:
-                    _cells[_currRow, _currColumn - 1].visited = true;
-                    DestroyWallIfItExists(_cells[_currRow, _currColumn - 1].eastWall);
-                    _currColumn--;
+                    DestroyWallIfItExists(_cells[_currX - 1, _currY].eastWall);
+                    _cells[_currX - 1, _currY].visited = true;
+                    _currX--;
                     break;
             }
-            _rend = _cells[_currRow, _currColumn].GetComponent<Renderer>();
+            _rend = _cells[_currX, _currY].GetComponent<Renderer>();
             _rend.material.color = _rend.material.color == Color.gray ? Color.white : Color.gray;
         }
         //3. If all adjacent cells have been visited, back up to the previous cell.
         else if (_lastDirections.Count > 0)
         {
-            _cells[_currRow, _currColumn].GetComponent<Renderer>().material.color = Color.white;
+            _cells[_currX, _currY].GetComponent<Renderer>().material.color = Color.white;
             Backtrack();
         }
         else
         {
-            _cells[_currRow, _currColumn].GetComponent<Renderer>().material.color = Color.white;
+            _cells[_currX, _currY].GetComponent<Renderer>().material.color = Color.white;
             CourseComplete = true;
         }
     }
@@ -122,10 +110,10 @@ public class RecursiveBacktrackingAlg : MazeAlgorithm
     private void Backtrack()
     {
         Direction lastDirection = _lastDirections.Pop();
-        if (lastDirection == Direction.North) { _currRow++; }
-        if (lastDirection == Direction.South) { _currRow--; }
-        if (lastDirection == Direction.East) { _currColumn--; }
-        if (lastDirection == Direction.West) { _currColumn++; }
+        if (lastDirection == Direction.North) { _currY--; }
+        if (lastDirection == Direction.South) { _currY++; }
+        if (lastDirection == Direction.East) { _currX--; }
+        if (lastDirection == Direction.West) { _currX++; }
     }
 
     /// <summary>
@@ -140,13 +128,13 @@ public class RecursiveBacktrackingAlg : MazeAlgorithm
     /// <summary>
     /// Checks if the cell at the given location exists within the Maze and if the cell is unvisited.
     /// </summary>
-    /// <param name="row">The row the cell is in.</param>
-    /// <param name="column">The column the cell is in.</param>
+    /// <param name="x">The row the cell is in.</param>
+    /// <param name="y">The column the cell is in.</param>
     /// <returns>Visitability.</returns>
-    private bool CellIsAvailable(int row, int column) =>
-        row >= 0
-        && row < _mazeRows
-        && column >= 0
-        && column < _mazeColumns
-        && !_cells[row, column].visited;
+    private bool CellIsAvailable(int x, int y) =>
+        x >= 0
+        && x < _mazeColumns
+        && y >= 0
+        && y < _mazeRows
+        && !_cells[x, y].visited;
 }

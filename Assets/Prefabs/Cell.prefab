@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 3334933412610287604}
   m_Layer: 0
   m_Name: Cell
-  m_TagString: Untagged
+  m_TagString: Cell
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -111,3 +111,4 @@ MonoBehaviour:
   southWall: {fileID: 0}
   eastWall: {fileID: 0}
   westWall: {fileID: 0}
+  startColor: {r: 1, g: 0.30588236, b: 0.30588236, a: 0}
