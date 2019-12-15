@@ -18,7 +18,9 @@ public class PlayerMovement : MonoBehaviour
             Input.GetAxisRaw("Horizontal") * Time.deltaTime * moveSpeed,
             0,
             Input.GetAxisRaw("Vertical") * Time.deltaTime * moveSpeed);
+        
     }
+
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Wall"))

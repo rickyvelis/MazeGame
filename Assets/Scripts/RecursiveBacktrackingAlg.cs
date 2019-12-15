@@ -32,7 +32,7 @@ public class RecursiveBacktrackingAlg : MazeAlgorithm
 
         while (!CourseComplete)
         {
-            yield return _stepDelay;
+            yield return StepDelay;
             VisitNeighbour();
         }
         Debug.Log("DONE GENERATING");

@@ -29,7 +29,7 @@ public class HuntAndKillAlg : MazeAlgorithm
 
         while (!CourseComplete)
         {
-            yield return _stepDelay;
+            yield return StepDelay;
             if (!Kill()) // Will return true until it hits a dead end.
             {
                 yield return Hunt();  // Finds the next unvisited cell with an adjacent visited cell. If it can't find any, it sets courseComplete to true.
@@ -174,7 +174,7 @@ public class HuntAndKillAlg : MazeAlgorithm
                         yield break;
                     }
                 }
-                yield return _stepDelay;
+                yield return StepDelay;
             }
         }
         _rend = _cells[_mazeColumns - 1, 0].GetComponent<Renderer>();

@@ -1,10 +1,12 @@
 ﻿using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
     public TMP_InputField InputX, InputY;
     public TMP_Dropdown DropdownAlg;
+    public Slider DelaySlider;
     public MazeCell Cell;
     public GameObject Wall;
     public int SizeX, SizeY;
@@ -26,14 +28,15 @@ public class GameManager : MonoBehaviour
         if (!int.TryParse(InputY.text, out SizeY)) SizeY = 5;
         if (SizeX == 0) SizeX = 2;
         if (SizeY == 0) SizeY = 2;
+        DelaySlider.onValueChanged.AddListener(delegate { SetStepDelay(); });
+
 
         if (_firstTimeGenerate)
         {
             BeginGame();
             _firstTimeGenerate = false;
         }
-        else
-            RestartGame();
+        else RestartGame();
     }
 
     public void Update()
@@ -43,6 +46,11 @@ public class GameManager : MonoBehaviour
         //    {
         //        //Play the actual game
         //    }
+
+        if (_ma != null && !_ma.CourseComplete)
+        {
+
+        }
     }
 
     /// <summary>
@@ -161,5 +169,11 @@ public class GameManager : MonoBehaviour
                 Debug.LogError("No algorithm selected.");
                 break;
         }
+    }
+
+    public void SetStepDelay()
+    {
+        GenerationStepDelay = DelaySlider.value;
+        _ma.StepDelay = new WaitForSeconds(DelaySlider.value);
     }
 }
