@@ -3082,7 +3082,7 @@ MonoBehaviour:
   Cell: {fileID: 3334933412610287604, guid: 735f4d2b944ccd14da92c49f7e41c08f, type: 3}
   Wall: {fileID: 1966329655224388490, guid: f5cad9b41a12b2946948ed918be5405a, type: 3}
   Pellet: {fileID: 920954212239628197, guid: 7a2d2f726e35b4447bf1a2c6fff1b7dd, type: 3}
-  Player: {fileID: 1943583665497506521, guid: 7cf12660f6ef95143989d28449fec2a9, type: 3}
+  Player: {fileID: 356468295117029492, guid: 7cf12660f6ef95143989d28449fec2a9, type: 3}
   SizeX: 5
   SizeY: 5
   Size: 1

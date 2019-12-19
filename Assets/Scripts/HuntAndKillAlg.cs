@@ -113,7 +113,6 @@ public class HuntAndKillAlg : MazeAlgorithm
 
     private IEnumerator Hunt()
     {
-        CourseComplete = true; // Set it to this, and see if we can prove otherwise below.
         int lastX = int.MaxValue;
         int lastY = int.MaxValue;
 
@@ -179,6 +178,7 @@ public class HuntAndKillAlg : MazeAlgorithm
         }
         _rend = _cells[_mazeColumns - 1, 0].GetComponent<Renderer>();
         _rend.material.color = Color.white;
+        CourseComplete = true;
     }
 
     /// <summary>

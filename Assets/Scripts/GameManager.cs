@@ -7,14 +7,19 @@ public class GameManager : MonoBehaviour
     public TMP_InputField InputX, InputY;
     public TMP_Dropdown DropdownAlg;
     public Slider DelaySlider;
+
     public MazeCell Cell;
     public GameObject Wall;
+    public GameObject Pellet;
+    public Player Player;
     public int SizeX, SizeY;
     public float Size = 1.0f;
-    public float GenerationStepDelay;
+    public float GenerationStepDelay = 0;
 
     private MazeCell[,] _cells;
     private GameObject _mazeContainer;
+    private GameObject _spawnedPellet;
+    private Player _spawnedPlayer;
 
     private MazeAlgorithm _ma;
 
@@ -26,9 +31,9 @@ public class GameManager : MonoBehaviour
         // Get the given X and Y sizes of the maze from the InputFields
         if (!int.TryParse(InputX.text, out SizeX)) SizeX = 5;
         if (!int.TryParse(InputY.text, out SizeY)) SizeY = 5;
-        if (SizeX == 0) SizeX = 2;
-        if (SizeY == 0) SizeY = 2;
-        DelaySlider.onValueChanged.AddListener(delegate { SetStepDelay(); });
+        if (SizeX < 2) SizeX = 2;
+        if (SizeY < 2) SizeY = 2;
+        DelaySlider.onValueChanged.AddListener(delegate { SetStepDelay(DelaySlider.value); });
 
 
         if (_firstTimeGenerate)
@@ -41,15 +46,16 @@ public class GameManager : MonoBehaviour
 
     public void Update()
     {
-        //if (!_firstTimeGenerate)
-        //    if (_ma != null &&_ma.CourseComplete)
-        //    {
-        //        //Play the actual game
-        //    }
-
-        if (_ma != null && !_ma.CourseComplete)
+        if (_ma != null && _ma.CourseComplete)
         {
-
+            StopAllCoroutines();
+            if (_spawnedPellet == null) InstantiatePellet();
+            if (_spawnedPlayer == null) InstantiatePlayer();
+            else if (_spawnedPlayer.waiting)
+            {
+                _spawnedPlayer.Respawn(Random.Range(0, SizeX), Random.Range(0, SizeY));
+            }
+            
         }
     }
 
@@ -67,15 +73,6 @@ public class GameManager : MonoBehaviour
         // Generate the maze with the chosen algorithm
         if (_ma != null) StartCoroutine(_ma.Generate());
 
-        //for (int x = 0; x < _cells.GetLength(0); x++)
-        //{
-        //    for (int y = 0; y < _cells.GetLength(1); y++)
-        //    {
-        //        _cells[x, y].transform.DetachChildren();
-
-        //    }
-        //}
-
         // Adjust the size and far clipping plane of the orthographic camera
         ConfigureOrthCam();
 
@@ -89,7 +86,10 @@ public class GameManager : MonoBehaviour
     public void RestartGame()
     {
         //Destroy the whole maze
-        GameObject.Destroy(_mazeContainer);
+        Destroy(_mazeContainer);
+        Destroy(_spawnedPellet);
+
+        _spawnedPlayer.Wait();
 
         //Stop all the running coroutines
         StopAllCoroutines();
@@ -98,18 +98,32 @@ public class GameManager : MonoBehaviour
         BeginGame();
     }
 
+    public void InstantiatePellet()
+    {
+        int randX = Random.Range(0, SizeX);
+        int randY = Random.Range(0, SizeY);
+        _spawnedPellet = Instantiate(Pellet, new Vector3(randX, 0, randY), Quaternion.identity) as GameObject;
+    }
+
+    public void InstantiatePlayer()
+    {
+        int randX = Random.Range(0, SizeX);
+        int randY = Random.Range(0, SizeY);
+        _spawnedPlayer = Instantiate(Player, new Vector3(randX, 0, randY), Quaternion.identity) as Player;
+    }
+
     /// <summary>
     /// Adjusts the Size and farClipPlane properties of the Camera, so the maze will fill the screen correctly.
     /// </summary>
     private void ConfigureOrthCam()
     {
-        float mazeSizeRatio = (float)SizeX / (float)SizeY;
+        float mazeSizeRatio = (float)SizeX / SizeY;
 
         // If mazeSizeRatio is bigger than the Camera's aspect ratio, base the Camera's Orthograpic size on the wisth (SizeX) of the Maze.
         if (mazeSizeRatio < Camera.main.aspect)
-            Camera.main.orthographicSize = ((float)SizeY / 2);
+            Camera.main.orthographicSize = (float)SizeY / 2;
         else
-            Camera.main.orthographicSize = ((float)SizeX / 2) / Camera.main.aspect;
+            Camera.main.orthographicSize = (float)SizeX / 2 / Camera.main.aspect;
 
         //Sets Camera's Far Clipping Plane depending on the biggest Dimension of the maze
         if (SizeX > SizeY)
@@ -171,9 +185,13 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void SetStepDelay()
+    /// <summary>
+    /// Sets the maze generation step delay in seconds
+    /// </summary>
+    public void SetStepDelay(float delay)
     {
-        GenerationStepDelay = DelaySlider.value;
-        _ma.StepDelay = new WaitForSeconds(DelaySlider.value);
+
+        GenerationStepDelay = delay;
+        _ma.StepDelay = new WaitForSeconds(delay);
     }
 }
