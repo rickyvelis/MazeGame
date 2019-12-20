@@ -10,7 +10,6 @@ public class RecursiveBacktrackingAlg : MazeAlgorithm
 
     public RecursiveBacktrackingAlg(MazeCell[,] mazeCells, float delay) : base(mazeCells, delay) { }
 
-
     //1. Choose a random cell to start.
     //2. Randomly choose an unvisited neighbouring cell and remove wall between them.
     //3. If all adjacent cells have been visited, back up to the previous cell.
@@ -23,19 +22,26 @@ public class RecursiveBacktrackingAlg : MazeAlgorithm
     {
         _lastDirections = new Stack<Direction>();
 
-        //1. Choose a random cell to start.
+        // Choose a random Cell to start.
         _currX = Random.Range(0, _mazeColumns);
         _currY = Random.Range(0, _mazeRows);
-        _cells[_currX, _currY].visited = true;
+
+        // Set the random Cell to visited.
+        _cells[_currX, _currY].Visited = true;
+
+        // Set material color of the starting Cell gray.
         _rend = _cells[_currX, _currY].GetComponent<Renderer>();
         _rend.material.color = Color.gray;
 
+        // Begin Maze Generation loop.
         while (!CourseComplete)
         {
+            // Suspend coroutine for given amount of seconds.
             yield return StepDelay;
+
+            //Visit neighbours until there are no neighbours left.
             VisitNeighbour();
         }
-        Debug.Log("DONE GENERATING");
     }
 
     /// <summary>
@@ -61,44 +67,52 @@ public class RecursiveBacktrackingAlg : MazeAlgorithm
         //the neighbour the new current cell.
         if (neighbCount > 0)
         {
+            // Randomly choose a neighbouring unvisited Cells, destroy wall between them and
+            // make the new Cell the current Cell.
             int rand = Random.Range(0, neighbCount);
             Direction dir = (Direction)availableDirections[rand];
-            _lastDirections.Push(dir);
-
             switch (dir)
             {
                 case Direction.North:
-                    DestroyWallIfItExists(_cells[_currX, _currY].northWall);
-                    _cells[_currX, _currY + 1].visited = true;
+                    DestroyWallIfItExists(_cells[_currX, _currY].NorthWall);
+                    _cells[_currX, _currY + 1].Visited = true;
                     _currY++;
                     break;
                 case Direction.South:
-                    DestroyWallIfItExists(_cells[_currX, _currY - 1].northWall);
-                    _cells[_currX, _currY - 1].visited = true;
+                    DestroyWallIfItExists(_cells[_currX, _currY - 1].NorthWall);
+                    _cells[_currX, _currY - 1].Visited = true;
                     _currY--;
                     break;
                 case Direction.East:
-                    DestroyWallIfItExists(_cells[_currX, _currY].eastWall);
-                    _cells[_currX + 1, _currY].visited = true;
+                    DestroyWallIfItExists(_cells[_currX, _currY].EastWall);
+                    _cells[_currX + 1, _currY].Visited = true;
                     _currX++;
                     break;
                 case Direction.West:
-                    DestroyWallIfItExists(_cells[_currX - 1, _currY].eastWall);
-                    _cells[_currX - 1, _currY].visited = true;
+                    DestroyWallIfItExists(_cells[_currX - 1, _currY].EastWall);
+                    _cells[_currX - 1, _currY].Visited = true;
                     _currX--;
                     break;
             }
+            // Remember the direction to the chosen neighbour, so backtracking is possible.
+            _lastDirections.Push(dir);
+
+            // Turn the new current Cell Gray. If the Cell already was gray, turn it white.
             _rend = _cells[_currX, _currY].GetComponent<Renderer>();
             _rend.material.color = _rend.material.color == Color.gray ? Color.white : Color.gray;
         }
-        //3. If all adjacent cells have been visited, back up to the previous cell.
+        // If all adjacent Cells have been visited, back up to the previous Cell if there is a previous Cell.
         else if (_lastDirections.Count > 0)
         {
+            // Turn current Cell white
             _cells[_currX, _currY].GetComponent<Renderer>().material.color = Color.white;
+
+            // Back up to previous cell.
             Backtrack();
         }
         else
         {
+            // Turn last Cell white.
             _cells[_currX, _currY].GetComponent<Renderer>().material.color = Color.white;
             CourseComplete = true;
         }
@@ -109,6 +123,7 @@ public class RecursiveBacktrackingAlg : MazeAlgorithm
     /// </summary>
     private void Backtrack()
     {
+        //Get the previous direction (pop from the stack) and go to the Cell opposite of that direction.
         Direction lastDirection = _lastDirections.Pop();
         if (lastDirection == Direction.North) { _currY--; }
         if (lastDirection == Direction.South) { _currY++; }
@@ -136,5 +151,5 @@ public class RecursiveBacktrackingAlg : MazeAlgorithm
         && x < _mazeColumns
         && y >= 0
         && y < _mazeRows
-        && !_cells[x, y].visited;
+        && !_cells[x, y].Visited;
 }

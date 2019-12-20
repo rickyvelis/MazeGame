@@ -2,53 +2,30 @@
 
 public class Player : MonoBehaviour
 {
-    public Rigidbody rb;
-    public float moveSpeed = 5;
-    public bool waiting = true;
+    public Rigidbody RB;
+    public float MoveSpeed = 5;
+    public bool Won;
 
     private Vector3 _input;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
-    public void Respawn(int x, int y)
-    {
-        waiting = false;
-        gameObject.transform.position = new Vector3(x, 0, y);
-    }
-
-    public void Wait()
-    {
-        gameObject.transform.position = new Vector3(0f, -1f, 0f);
-        waiting = true;
-    }
-
+    /// <summary>
+    /// Update is called every frame, if the MonoBehaviour is enabled.
+    /// </summary>
     void Update()
     {
-        //transform.Translate(
-        //    Input.GetAxisRaw("Horizontal") * Time.fixedDeltaTime * moveSpeed,
-        //    0,
-        //    Input.GetAxisRaw("Vertical") * Time.fixedDeltaTime * moveSpeed);
-        if (!waiting)
-        {
-            _input = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
-            rb.velocity = _input * moveSpeed;
-        }
+        // Detect user input and apply its value times moveSpeed, on the RigidBody's velocity.
+        _input = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
+        RB.velocity = _input * MoveSpeed;
     }
 
+    /// <summary>
+    /// OnCollisionEnter is called when this collider/rigidbody has begun touching another rigidbody/collider.
+    /// </summary>
+    /// <param name="collision"></param>
     private void OnCollisionEnter(Collision collision)
     {
-        //if (collision.gameObject.CompareTag("Wall"))
-        //{
-        //    rb.velocity = Vector3.zero;
-        //}
+        // If Player touches Pallet, Player wins.
         if (collision.gameObject.CompareTag("Pellet"))
-        {
-            Wait();
-
-        }
+            Won = true;
     }
 }

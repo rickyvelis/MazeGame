@@ -109,7 +109,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 116
-  m_CollisionDetection: 2
+  m_CollisionDetection: 1
 --- !u!114 &356468295117029492
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -124,3 +124,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 1943583665497506522}
   moveSpeed: 5
+  waiting: 0
+  won: 0

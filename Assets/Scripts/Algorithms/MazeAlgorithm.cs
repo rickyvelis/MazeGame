@@ -3,10 +3,10 @@ using UnityEngine;
 
 public abstract class MazeAlgorithm
 {
-    protected MazeCell[,] _cells;
-    protected int _mazeRows, _mazeColumns;
-    public WaitForSeconds StepDelay;
-    public bool CourseComplete;
+    protected MazeCell[,] _cells;       // Every Cell.
+    protected int _mazeRows, _mazeColumns; // Total rows and columns.
+    public WaitForSeconds StepDelay;    // Amount of seconds the coroutine should be delayed for.
+    public bool CourseComplete;         // Indicator for if the algorithm is done generating.
 
     protected MazeAlgorithm(MazeCell[,] mazeCells, float delay)
     {
