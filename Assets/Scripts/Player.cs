@@ -2,7 +2,7 @@
 
 public class Player : MonoBehaviour
 {
-    public Rigidbody RB;
+    public Rigidbody Rb;
     public float MoveSpeed = 5;
     public bool Won;
 
@@ -15,7 +15,7 @@ public class Player : MonoBehaviour
     {
         // Detect user input and apply its value times moveSpeed, on the RigidBody's velocity.
         _input = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
-        RB.velocity = _input * MoveSpeed;
+        Rb.velocity = _input * MoveSpeed;
     }
 
     /// <summary>
